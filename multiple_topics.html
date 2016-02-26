@@ -5,8 +5,9 @@
 <script type="text/javascript" src="js/mqttws31.js"></script>
 <script>
 var client;
-var subscribeTopic = 'teststring/';
+var subscribeTopic = 'teststring/#';
 var Messages = '';
+//var Topics = Array('teststring/topic1', 'teststring/topic2');
 
 //http://www.eclipse.org/paho/files/jsdoc/symbols/Paho.MQTT.Client.html#connect
 
@@ -58,9 +59,17 @@ function onConnectionLost(responseObject){
 
 function onMessageArrived(message){
         console.log("onMessageArrived: "+message.payloadString);
-        Messages += '\n'+message.payloadString;
-        document.getElementById('response').innerHTML = '<pre>'+Messages+'</pre>';
+        //Messages += '\n'+message.payloadString;
+        //document.getElementById('response').innerHTML = '<pre>'+Messages+'</pre>';
         //document.getElementById('output').html = '<pre>'+Messages+'</pre>';
+        var txt = message.payloadString;
+        var arr = txt.split(':');
+        //alert(arr[0]);
+        if( arr[0] == 'topic1' ){
+	  document.getElementById('response1').innerHTML = '<pre>'+arr[1]+'</pre>';
+        }else if(arr[0] == 'topic2'){
+	  document.getElementById('response2').innerHTML = '<pre>'+arr[1]+'</pre>';
+        }
         
 }
 
@@ -77,16 +86,16 @@ function doDisconnect(){
 function doPublish(payload, topic){
         var message = new Paho.MQTT.Message(payload);
         message.destinationName = topic;
-        message.qos = 0;
+        message.qos = 1;
         message.retained = false;
         client.send(message);
 }
 
-function sendMessage(){
-        var text = document.getElementById('message').value;
+function sendMessage(text, topic){
+        //var text = document.getElementById('message').value;
         
         //alert(text);
-        doPublish(text, subscribeTopic);
+        doPublish(text, topic);
 }
 
 
@@ -95,11 +104,22 @@ function sendMessage(){
 
 <body>
 <form>
-<label>Message</label>
-<input type="text" size="50" id="message"/><br/>
-<input type="button" name="Send" value="Send" onclick="sendMessage()"/>
+<div id="box1" style="width:500px;height:500px;float:left;border:1px solid #000;padding:5px;margin:5px">
+<h4>Message Box1</h4>
+<input type="text" size="30" id="message1"/>
+<input type="button" name="Send1" value="Send1" onclick="sendMessage('topic1:'+document.getElementById('message1').value, 'teststring/topic1')"/>
 <br/>
-<div style="width:500px;height:300px" id="response"></div>
+<label>Response</label><br/>
+<div style="width:200px;height:300px" id="response1"></div>
+</div>
+<div id="box2" style="width:500px;height:500px;float:left;border:1px solid #000;padding:5px;margin:5px">
+<h4>Message Box2</h4>
+<input type="text" size="30" id="message2"/>
+<input type="button" name="Send2" value="Send2" onclick="sendMessage('topic2:'+document.getElementById('message2').value, 'teststring/topic2')"/>
+<br/>
+<label>Response</label><br/>
+<div style="width:200px;height:300px" id="response2"></div>
+</div>
 </form>
 </body>
 </html>
