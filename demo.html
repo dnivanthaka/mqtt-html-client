@@ -1,0 +1,70 @@
+<html>
+<head>
+<title>MQTT Demo</title>
+<script type="text/javascript" src="js/mqttws31.js"></script>
+<script>
+var client;
+var subscribeTopic = '/TestX';
+var Messages = '';
+
+window.onload = function(){
+        //alert("Im ready");
+        client = new Paho.MQTT.Client("broker.mqttdashboard.com", 8000, "myclientid_" + parseInt(Math.random() * 100, 10));
+        //client = new Paho.MQTT.Client(location.hostname, Number(location.port), "clientId");
+
+        client.onConnectionLost = onConnectionLost;
+        client.onMessageArrived = onMessageArrived;
+
+        client.connect({onSuccess:onConnect, onFailure:onFailure});        
+}
+
+function onConnect(){
+        console.log("onConnect");
+        client.subscribe(subscribeTopic);
+        //var message = new Paho.MQTT.Message("Hello");
+        //message.destinationName = "/World";
+        //client.send(message);
+}
+
+function onFailure(message){
+        console.log("Connection failed: "+message.errorMessage);
+}
+
+function onConnectionLost(responseObject){
+        if( responseObject.errorCode !== 0 ){
+                console.log("onConnectionLost: "+responseObject.errorMessage);
+        }
+}
+
+function onMessageArrived(message){
+        console.log("onMessageArrived: "+message.payloadString);
+}
+
+function doDisconnect(){
+        client.disconnect();
+}
+
+function doPublish(payload, topic){
+        var message = new Paho.MQTT.Message(payload);
+        message.destinationName = topic;
+        client.send(message);
+}
+
+function sendMessage(){
+        var text = document.getElementById('message').value;
+        //alert(text);
+        doPublish(text, subscribeTopic);
+}
+</script>
+</head>
+
+<body>
+<form>
+<label>Message</label>
+<input type="text" size="50" id="message"/><br/>
+<input type="button" name="Send" value="Send" onclick="sendMessage()"/>
+<br/>
+<div style="width:500px;height:300px" id="output"></div>
+</form>
+</body>
+</html>
