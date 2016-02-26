@@ -38,6 +38,9 @@ function onConnectionLost(responseObject){
 
 function onMessageArrived(message){
         console.log("onMessageArrived: "+message.payloadString);
+        Messages += '\n'+message.payloadString;
+        //document.getElementById('output').html = '<pre>'+Messages+'</pre>';
+        
 }
 
 function doDisconnect(){
@@ -55,6 +58,8 @@ function sendMessage(){
         //alert(text);
         doPublish(text, subscribeTopic);
 }
+
+
 </script>
 </head>
 
